@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[11]:
 
 
+# Thêm các thư viện
 import re
 import numpy as np
 import pandas as pd
@@ -15,16 +16,18 @@ def check_valid(line):
         return True
     else:
         return False
+# Tạo hàm kiểm tra sự vi phạm trường hợp số lượng câu trả lời
 def check_valid1(line):
     lines = line.split(",")
-    if len(lines) != 26:
-        return False
-    else:
+    if len(lines) == 26:
         return True
+    else:
+        return False
+# Tạo hàm kiểm tra sự vi phạm trường hợp sai mã số của học sinh
 def check_valid2(x):
     lines = x.split(",")
-    v = re.match('N\d{8}',lines[0])
-    if v:
+    first_item = re.match('N\d{8}',lines[0])
+    if first_item:
         return True
     else:
         return False
@@ -55,18 +58,17 @@ def check_skip_false(line):
             list_skip.append("SK")
         else:
             list_skip.append("F")
-    return list_skip        
+    return list_skip
+# Nhập đầu vào
 f = input("Enter a class to grade: ")
 duoi = ".txt"
 k= f+duoi
-new = "_grade.txt"
-n= f+new
-list_diem = []
-list_all_skip =[]
-tonghop =[]
-line_count =0
-linevalid_count=0
-lineinvalid_count=0
+list_diem = [] # Biến liệt kê điểm
+list_all_skip =[] # Biến tổng hợp đánh giá tất cả câu trả lời của học sinh
+tonghop =[] # Biến tổng hợp danh sách mã học sinh và điểm thi
+line_count =0 # Biến đếm số lượng học sinh
+lineinvalid_count=0 # Biến đếm số dòng dữ liệu không hợp lệ
+# Chạy dữ liệu kiểm tra từng hàng và thống kê kết quả
 try:
     a= open(k,"r")
     print("Successfully opened",k)
@@ -78,7 +80,6 @@ try:
         if status == True:
             diem = check_point(line)
             skip = check_skip_false(line)
-            linevalid_count=linevalid_count+1
             list_diem.append(diem)
             list_all_skip.append(tuple(skip))
             str1=[line[0:9],str(diem)]
@@ -96,7 +97,7 @@ try:
                 print(line)
     if lineinvalid_count == 0:
         print("No errors found!")
-    # Tạo mảng để thống kê
+    # Tạo mảng bằng thư viện numpy để thống kê
     a=np.array(list_diem)
     filter_arr= a > 80
     x=a[filter_arr]
@@ -107,12 +108,11 @@ try:
     median_a=np.median(a)
 except:
     print("Sorry, I can't find this filename")
-list_false= []
-list_skip = []
-# tạo dataframe tổng hợp số liệu
+# Tạo dataframe tổng hợp số liệu của tất cả học sinh
 df=pd.DataFrame(data=list_all_skip,
                     columns=["No",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25])
-#Tìm số câu trả lời bỏ qua nhiều nhất, sai nhiều nhất
+#Tìm câu trả lời bỏ qua nhiều nhất, số lượng học sinh tương ứng
+list_skip = []
 max_1=0
 for i in range(1,26):
     j=df[i]
@@ -130,6 +130,8 @@ for i in range(1,26):
         list_skip.append(str4)
     else:
         g=1
+#Tìm câu trả lời sai nhiều nhất, số lượng học sinh tương ứng
+list_false= []
 max_2=0
 for i in range(1,26):
     j=df[i]
@@ -137,7 +139,7 @@ for i in range(1,26):
     if max_2 < h:
         max_2=h
     else:
-        max_2=max_2+0
+        max_2=max_2+0 
 for i in range(1,26):
     j=df[i]
     h=j.where(j=="F").count()
@@ -147,12 +149,14 @@ for i in range(1,26):
         list_false.append(str6)
     else:
         g=1
-# Tạo file mới
+# Tạo file output
+new = "_grade.txt"
+n= f+new
 p="\n".join(tonghop)
 c=open(n,'w')
 c.write(p)
 c.close()
-#In kết quả part 1
+#In kết quả thống kê mô tả
 print("**** REPORT ****")
 print("Total lines of data: ",line_count)
 print("Total invalid lines of data: ",lineinvalid_count)
@@ -162,7 +166,7 @@ print("Highest score: ",max_a)
 print("Lowest score: ",min_a)
 print("Range of scores: ",range_score_a)
 print("Median score: ",median_a)
-#in kết quả part 2
+#In kết quả câu trả lời bỏ qua nhiều nhất, sai nhiều nhất
 most_skip=", ".join(list_skip)
 print("Question that most people skip: ",most_skip)
 most_false=", ".join(list_false)
