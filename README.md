@@ -1,10 +1,10 @@
 # Các ứng dụng cần có
 
-##Python
+## Python
 
 Tải bản mới nhất trên trang web python.org
 
-##Thư viện Numpy
+## Thư viện Numpy
 Mở Command Prompt và thực hiện câu lệnh
 ```bash
 pip install numpy
